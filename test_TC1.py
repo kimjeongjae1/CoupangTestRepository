@@ -13,7 +13,7 @@ from urllib import parse
 
 
 class TestMainPage:
-    @pytest.mark.skip("아직 TC 발동 안함")
+    
     def test_search_items_Nologin(self, driver: WebDriver):
         try:
             time.sleep(2)
@@ -53,7 +53,7 @@ class TestMainPage:
 
 
     #로그인 상태 검색
-    @pytest.mark.skip("아직 TC 발동 안함")
+    
     def test_search_items_login(self, driver: WebDriver):
         try:
             time.sleep(2)
