@@ -13,7 +13,6 @@ import random
 class Test_TC2:
     def test_basket(self, driver: WebDriver):
         try:
-        
 
             ITEMS_XPATH = "//form//ul/li"  # 상품 리스트 XPath
             main_page = MainPage(driver)
@@ -55,7 +54,9 @@ class Test_TC2:
             else:
                 print("검색된 상품이 없습니다.")
                 return
+            
 
+            
             # 장바구니에 추가하기
             add_basket = ws(driver, 20).until(
                 EC.element_to_be_clickable(
@@ -67,6 +68,54 @@ class Test_TC2:
             # 장바구니 페이지로 이동
             time.sleep(random.uniform(2, 4))
             main_page.click_LINK_TEXT('장바구니')
+
+
+            #수량 변경 테스트 진행
+            item_add_button_xpath = "//*[@id='cartTable-other']/tr[2]/td[2]/div[3]/div[1]/div[2]"
+
+            # 반복적으로 수량 추가 버튼 클릭
+            while True:
+                try:
+                    # 수량 추가 버튼을 찾기
+                    item_add_button = ws(driver, 10).until(
+                        EC.element_to_be_clickable((By.XPATH, item_add_button_xpath))
+                    )
+
+                    # 버튼 클릭
+                    item_add_button.click()
+
+                    
+                    time.sleep(random.uniform(1, 2))
+
+                    # 수량이 더 이상 추가되지 않으면 종료
+                    # 수량 추가 버튼이 비활성화되었는지 확인
+                    if not item_add_button.is_enabled():
+                        print("더 이상 수량을 추가할 수 없습니다.")
+                        break
+
+                except Exception as e:
+                    print(f"Error while adding quantity: {e}")
+                    break
+
+            item_delete_xpath = "//*[@id='cartTable-other']/tr[2]/td[2]/div[1]/a"
+            item_delete = ws(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, item_delete_xpath))
+                ).click()
+
+            time.sleep(random.uniform(1, 2))
+
+            # 장바구니 페이지 새로고침
+            driver.refresh()
+            time.sleep(2)
+
+            # 장바구니가 비어있는지 확인
+            empty_cart_xpath = "//*[@id='cartTable-other']/tr"  # 장바구니 항목을 확인할 XPath
+            cart_items = driver.find_elements(By.XPATH, empty_cart_xpath)
+
+            if not cart_items:
+                print("장바구니가 비었습니다.")
+            else:
+                print("장바구니에 항목이 남아 있습니다.")    
 
         except Exception as e:
             print(f"Error: {e}")
