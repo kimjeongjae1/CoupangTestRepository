@@ -3,6 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
+from hide import EMAIL, PASSWORD
 class MainPage:
     URL = "https://www.coupang.com"
     SEARCH_INPUT_ID = "headerSearchKeyword"
@@ -30,7 +31,7 @@ class MainPage:
         login_button.click()
 
     #로그인 기능 구현
-    def login(self, email: str = "qwerty3164@nate.com" , password: str = "01095994428a" ):
+    def login(self, email: str = EMAIL , password: str = PASSWORD ):
         # 로그인 페이지 이동
         self.open()
         WebDriverWait(self.driver, 10).until(
