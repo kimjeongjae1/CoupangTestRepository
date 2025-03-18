@@ -21,7 +21,7 @@ import random
 class Test_TC2:
     def test_basket(self, driver: WebDriver):
         try:
-            ITEMS_XPATH = "//form//ul/li"  # 상품 리스트 XPath
+            ITEMS_XPATH = "//li[contains(@class, 'search-product')]"  # 상품 리스트 XPath
             main_page = MainPage(driver)
             main_page.open()
 
@@ -35,8 +35,30 @@ class Test_TC2:
             wait.until(EC.url_contains("coupang.com"))
             assert "coupang.com" in driver.current_url
 
-            # '노트북' 검색
-            main_page.search_items('노트북')
+            time.sleep(2) #2초 왜? 봇인거 안들키기 위해서 
+        
+            text_to_type = "노"
+            text_to_type_two = "트"
+            text_to_type_three = "북"
+
+            text_list = [text_to_type, text_to_type_two, text_to_type_three]
+
+
+            for i in text_list:
+                for char in i:
+                    main_page.search_text_input(char)
+                    time.sleep(3)  # 0.2초(200ms) 정도 대기 (원하는 만큼 조절)
+                
+            main_page.search_text_enter()
+            ws(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, ITEMS_XPATH))
+            )
+            
+
+            for char in text_to_type:
+                main_page.search_text_input(char)
+                time.sleep(2)  # 1.0초 대기
+            main_page.search_text_enter()
 
             # 상품들이 로드될 때까지 대기
             wait.until(EC.presence_of_element_located((By.XPATH, ITEMS_XPATH)))
