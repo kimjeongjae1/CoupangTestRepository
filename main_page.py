@@ -3,11 +3,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
-from hide import EMAIL, PASSWORD
+import time
+from selenium.webdriver.common.action_chains import ActionChains
 
-import pickle
-import os
-
+from hide import EMAIL,PASSWORD
 class MainPage:
     URL = "https://www.coupang.com"
     SEARCH_INPUT_ID = "headerSearchKeyword"
@@ -23,61 +22,64 @@ class MainPage:
         self.driver.get(self.URL)
 
     #서치 기능 구현
-    def search_items(self, item_name: str):
+    def search_text_input(self, item_name: str, pause_between_chars=4):
+        """item_name 을 자모 단위(또는 영문자)로 순차 입력하며 타이핑"""
         search_input_box = self.driver.find_element(By.ID, self.SEARCH_INPUT_ID)
-        search_input_box.send_keys(item_name)
-        search_input_box.send_keys(Keys.ENTER)
-
-
-
-    def click_LINK_TEXT(self, link_text: str):
+        
+        # 1) ActionChains 객체 생성
+        actions = ActionChains(self.driver)
+        
+        # 2) 검색창을 클릭하여 포커스 이동
+        #    (이미 포커스가 가 있다면 생략 가능)
+        actions.move_to_element(search_input_box).click().pause(0.1)
+        
+        # 3) item_name의 각 글자를 순차 입력 + 글자마다 잠시 pause
+        for char in item_name:
+            actions.send_keys(char).pause(pause_between_chars)
+        
+        # 4) 한 번에 실행
+        actions.perform()
+    def click_by_LINK_TEXT(self, link_text: str):
         login_button = self.driver.find_element(By.LINK_TEXT, link_text)
         login_button.click()
+
+    def search_text_enter(self):
+        search_input_box = self.driver.find_element(By.ID, self.SEARCH_INPUT_ID)
+        actions = ActionChains(self.driver)
+        actions.move_to_element(search_input_box).click().pause(0.1)
+        actions.send_keys(Keys.ENTER)
+        actions.perform()
+        
 
     #로그인 기능 구현
     def login(self, email: str = EMAIL , password: str = PASSWORD ):
         # 로그인 페이지 이동
-        if os.path.exists(self.COOKIES_FILE):
-            self._load_cookies()
-            self.open()
-        else:
-            self.open()
-            WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.LINK_TEXT, "로그인"))
-            ).click()
+        self.open()
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.LINK_TEXT, "로그인"))
+        ).click()
 
-            # 이메일 입력
-            input_email = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//*[@id='login-email-input']"))
-            )
-            input_email.send_keys(email)
+        # 이메일 입력
+        input_email = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='login-email-input']"))
+        )
+        input_email.send_keys(email)
 
-            # 비밀번호 입력
-            input_password = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//*[@id='login-password-input']"))
-            )
-            input_password.send_keys(password)
+        # 비밀번호 입력
+        input_password = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='login-password-input']"))
+        )
+        input_password.send_keys(password)
 
-            # 로그인 버튼 클릭
-            WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, "//*[@id='memberLogin']/div[1]/form/div[5]/button"))
-            ).click()
+        # 로그인 버튼 클릭
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id='memberLogin']/div[1]/form/div[5]/button"))
+        ).click()
 
 
-        def _save_cookies(self):
-            cookies = self.driver.get_cookies()
-            with open(self.COOKIES_FILE, "wb") as cookies_file:
-                pickle.dump(cookies, cookies_file)
-
-        def _load_cookies(self):
-            with open(self.COOKIES_FILE, "rb") as cookies_file:
-                cookies = pickle.load(cookies_file)
-                for cookie in cookies:
-                    self.driver.add_cookie(cookie)
-
-        #검색결과 비교
-        def get_search_results(self, xpath: str = "//form//ul/li"):
-            WebDriverWait(self.driver, 20).until(
-                EC.presence_of_element_located((By.XPATH, xpath))
-            )
-            return [item.text for item in self.driver.find_elements(By.XPATH, xpath)]
+    #검색결과 비교
+    def get_search_results(self, xpath: str = "//form//ul/li"):
+        WebDriverWait(self.driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+        return [item.text for item in self.driver.find_elements(By.XPATH, xpath)]
