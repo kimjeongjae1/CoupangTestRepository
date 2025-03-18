@@ -9,7 +9,15 @@ from main_page import MainPage
 from selenium.webdriver.common.action_chains import ActionChains
 import random
 
+"""
+    현재 문제점
+    1. 지속되는 프로토콜 밴
+    2. 검색어 입력 후 랜덤한 상품 페이지로 이동이 불가 (49 ~ 73번 라인)
 
+=> 했다 치고, 장바구니 테스트 코드 진행
+
+
+"""
 class Test_TC2:
     def test_basket(self, driver: WebDriver):
         try:
@@ -179,6 +187,16 @@ class Test_TC2:
 
             #장바구니 이동
             main_page.click_LINK_TEXT('장바구니')
+
+            wait.until(EC.invisibility_of_element_located((By.XPATH, empty_cart_xpath)))
+
+            # 장바구니가 비어있는지 확인
+            cart_items = driver.find_elements(By.XPATH, empty_cart_xpath)
+
+            if not cart_items:
+                print("장바구니가 비었습니다.")
+            else:
+                print("장바구니에 항목이 남아 있습니다.")  
             
 
         except Exception as e:
